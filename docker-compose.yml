@@ -23,6 +23,34 @@ services:
       SCENARIO: ${SCENARIO:-live}
       INTERVAL: ${INTERVAL:-1}
 
+  opcua-simulator:
+    build:
+      context: .
+      dockerfile: opcua/Dockerfile
+    image: traffic-edge-opcua:latest
+    command: ["python", "-m", "traffic_edge.opcua_service"]
+    ports:
+      - "4840:4840"
+    environment:
+      OPCUA_ENDPOINT: opc.tcp://0.0.0.0:4840/traffic/
+      INTERVAL: ${INTERVAL:-1}
+
+  opcua-bridge:
+    build:
+      context: .
+      dockerfile: opcua/Dockerfile
+    image: traffic-edge-opcua:latest
+    command: ["python", "-m", "traffic_edge.opcua_mqtt_bridge"]
+    depends_on:
+      opcua-simulator:
+        condition: service_started
+      mosquitto:
+        condition: service_healthy
+    environment:
+      OPCUA_ENDPOINT: opc.tcp://opcua-simulator:4840/traffic/
+      MQTT_BROKER: mosquitto
+      INTERVAL: ${INTERVAL:-1}
+
   web:
     build:
       context: .

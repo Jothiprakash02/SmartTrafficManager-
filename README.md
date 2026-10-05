@@ -1,5 +1,7 @@
 # Traffic Edge Prototype
 
+For the complete architecture, data flow, technologies, scenarios, testing instructions, deployment process, and limitations, see [PROJECT_DOCUMENTATION.md](PROJECT_DOCUMENTATION.md).
+
 This repository implements the core of the proposed three-junction traffic system:
 
 `Python simulator -> MQTT/Mosquitto -> Node-RED edge analytics -> InfluxDB -> Grafana`
@@ -43,7 +45,7 @@ The stop script checks Docker, validates Compose, stops all six services, remove
 ```
 
 Compose builds a small Node-RED image with `node-red-contrib-influxdb`, which is required by the included flow.
-It also builds a simulator container that continuously publishes fresh random baseline traffic to J1, J2, and J3 every second. This live stream starts automatically and keeps the Overview populated. The website feeder is optional and publishes a selected scenario as a one-shot test input; it does not replace the background live simulator.
+It also builds a simulator container that continuously publishes fresh random baseline traffic to J1, J2, and J3 every second. The integrated OPC UA simulator and bridge also run automatically and publish a second input stream to Node-RED. These live streams start automatically and keep the Overview populated. The website feeder is optional and publishes a selected scenario as a one-shot test input; it does not replace the background simulators.
 
 Configure the background stream interval or start it in a fixed scenario without editing files:
 
@@ -62,6 +64,7 @@ Endpoints:
 - InfluxDB: http://localhost:8086
 - Grafana: http://localhost:3000 (`admin` / `traffic-admin-password`)
 - MQTT: `localhost:1883`
+- OPC UA simulator: `opc.tcp://localhost:4840/traffic/`
 
 The traffic control website has three tabs. `Overview` shows the latest state of J1, J2, and J3, including congestion score, queue, speed, waiting time, and recommendations. `Feed traffic` provides five demonstration scenarios, editable values for every junction, and a side-by-side decision preview. `Decision view` expands the same traffic-to-analysis-to-decision chain into a dedicated response room.
 
@@ -73,7 +76,7 @@ The five scenarios are:
 4. `Weather slowdown`: corridor-wide speed and waiting-time degradation.
 5. `Cascade propagation`: a severe J1 -> J2 -> J3 propagation case.
 
-Compose mounts `node-red/flows-ditto-safe.json` into Node-RED. The flow subscribes to `traffic/junction/+`, validates the message, computes congestion, and writes the result to InfluxDB. Ditto updates are disabled by default unless a real Ditto endpoint is configured, so the core stack does not generate DNS errors when Ditto is not deployed.
+Compose mounts `node-red/flows-ditto-safe.json` into Node-RED. The flow subscribes to both `traffic/junction/+` and `traffic/opcua/junction/+`, validates both inputs with the same logic, computes congestion, and writes the result to InfluxDB. Ditto updates are disabled by default unless a real Ditto endpoint is configured, so the core stack does not generate DNS errors when Ditto is not deployed.
 
 Grafana loads `grafana/provisioning/dashboards/traffic-edge.json` automatically. It includes congestion score, vehicle count, queue length, and average speed panels for the last hour.
 

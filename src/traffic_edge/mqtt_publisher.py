@@ -10,6 +10,7 @@ def publish_readings(
     broker: str = "localhost",
     port: int = 1883,
     interval: float = 0.0,
+    topic_prefix: str = "traffic/junction/",
 ) -> None:
     """Publish readings to traffic/junction/<id>; paho is an optional extra."""
     try:
@@ -22,7 +23,7 @@ def publish_readings(
     client.loop_start()
     try:
         for reading in readings:
-            topic = f"traffic/junction/{reading.junction_id}"
+            topic = f"{topic_prefix}{reading.junction_id}"
             result = client.publish(topic, json.dumps(reading.to_dict()), qos=1)
             result.wait_for_publish()
             if interval:

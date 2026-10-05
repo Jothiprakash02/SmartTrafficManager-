@@ -1,4 +1,5 @@
 import random
+import types
 
 import pytest
 
@@ -6,6 +7,7 @@ from traffic_edge.analytics import analyze_reading, classify_congestion
 from traffic_edge.models import TrafficReading
 from traffic_edge.pipeline import EdgePipeline
 from traffic_edge.simulator import generate_reading, stream_readings
+from traffic_edge.mqtt_publisher import publish_readings
 
 
 def reading(**overrides: object) -> TrafficReading:
@@ -65,3 +67,42 @@ def test_live_stream_covers_all_junctions_continuously():
     readings = list(stream_readings({"J1": "live", "J2": "live", "J3": "live"}, 2, seed=11))
     assert [reading.junction_id for reading in readings] == ["J1", "J2", "J3", "J1", "J2", "J3"]
     assert all(reading.vehicle_count >= 0 for reading in readings)
+
+
+def test_mqtt_publisher_supports_opcua_topic_namespace(monkeypatch):
+    published = []
+
+    class FakeResult:
+        def wait_for_publish(self):
+            return None
+
+    class FakeClient:
+        def connect(self, *args):
+            return None
+
+        def loop_start(self):
+            return None
+
+        def loop_stop(self):
+            return None
+
+        def publish(self, topic, payload, qos):
+            published.append((topic, payload, qos))
+            return FakeResult()
+
+        def disconnect(self):
+            return None
+
+    class FakeMqtt:
+        CallbackAPIVersion = type("CallbackAPIVersion", (), {"VERSION2": 2})
+
+        @staticmethod
+        def Client(*args):
+            return FakeClient()
+
+    paho_mqtt = types.ModuleType("paho.mqtt")
+    paho_mqtt.client = FakeMqtt
+    monkeypatch.setitem(__import__("sys").modules, "paho.mqtt", paho_mqtt)
+    monkeypatch.setitem(__import__("sys").modules, "paho.mqtt.client", FakeMqtt)
+    publish_readings([reading(junction_id="J1")], topic_prefix="traffic/opcua/junction/")
+    assert published[0][0] == "traffic/opcua/junction/J1"

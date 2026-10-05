@@ -1,6 +1,6 @@
 $ErrorActionPreference = "Stop"
 
-$services = @("mosquitto", "influxdb", "simulator", "nodered", "grafana", "web")
+$services = @("mosquitto", "influxdb", "simulator", "opcua-simulator", "opcua-bridge", "nodered", "grafana", "web")
 $checks = @(
     @{ Name = "Traffic web app"; Url = "http://localhost:8000/" },
     @{ Name = "Node-RED"; Url = "http://localhost:1880/" },

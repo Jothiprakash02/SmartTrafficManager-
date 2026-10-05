@@ -4,7 +4,7 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-$services = @("mosquitto", "influxdb", "simulator", "nodered", "grafana", "web")
+$services = @("mosquitto", "influxdb", "simulator", "opcua-simulator", "opcua-bridge", "nodered", "grafana", "web")
 
 function Invoke-RequiredCommand {
     param([string]$Description, [scriptblock]$Command)
