@@ -1,0 +1,14 @@
+apiVersion: 1
+datasources:
+  - name: Traffic InfluxDB
+    uid: traffic-influxdb
+    type: influxdb
+    access: proxy
+    url: http://influxdb:8086
+    jsonData:
+      version: Flux
+      organization: traffic
+      defaultBucket: traffic
+      tlsSkipVerify: true
+    secureJsonData:
+      token: traffic-demo-token

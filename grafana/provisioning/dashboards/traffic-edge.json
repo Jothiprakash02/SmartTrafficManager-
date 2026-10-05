@@ -1,0 +1,64 @@
+{
+  "annotations": {"list": []},
+  "editable": true,
+  "graphTooltip": 1,
+  "panels": [
+    {
+      "datasource": {"type": "influxdb", "uid": "traffic-influxdb"},
+      "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "orange", "value": 6}, {"color": "red", "value": 9}]}}, "overrides": []},
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
+      "id": 1,
+      "title": "Congestion score by junction",
+      "type": "timeseries",
+      "targets": [{"query": "from(bucket: \"traffic\") |> range(start: -1h) |> filter(fn: (r) => r._measurement == \"traffic\" and r._field == \"congestion_score\") |> group(columns: [\"junction_id\"])"}]
+    },
+    {
+      "datasource": {"type": "influxdb", "uid": "traffic-influxdb"},
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0},
+      "id": 2,
+      "title": "Vehicle count",
+      "type": "timeseries",
+      "targets": [{"query": "from(bucket: \"traffic\") |> range(start: -1h) |> filter(fn: (r) => r._measurement == \"traffic\" and r._field == \"vehicle_count\") |> group(columns: [\"junction_id\"])"}]
+    },
+    {
+      "datasource": {"type": "influxdb", "uid": "traffic-influxdb"},
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
+      "id": 3,
+      "title": "Queue length",
+      "type": "timeseries",
+      "targets": [{"query": "from(bucket: \"traffic\") |> range(start: -1h) |> filter(fn: (r) => r._measurement == \"traffic\" and r._field == \"queue_length\") |> group(columns: [\"junction_id\"])"}]
+    },
+    {
+      "datasource": {"type": "influxdb", "uid": "traffic-influxdb"},
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8},
+      "id": 4,
+      "title": "Average speed",
+      "type": "timeseries",
+      "targets": [{"query": "from(bucket: \"traffic\") |> range(start: -1h) |> filter(fn: (r) => r._measurement == \"traffic\" and r._field == \"avg_speed\") |> group(columns: [\"junction_id\"])"}]
+    },
+    {
+      "datasource": {"type": "influxdb", "uid": "traffic-influxdb"},
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 16},
+      "id": 5,
+      "title": "Waiting time",
+      "type": "timeseries",
+      "targets": [{"query": "from(bucket: \"traffic\") |> range(start: -1h) |> filter(fn: (r) => r._measurement == \"traffic\" and r._field == \"waiting_time\") |> group(columns: [\"junction_id\"])"}]
+    },
+    {
+      "datasource": {"type": "influxdb", "uid": "traffic-influxdb"},
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 16},
+      "id": 6,
+      "title": "Latest recommendations",
+      "type": "table",
+      "targets": [{"query": "from(bucket: \"traffic\") |> range(start: -15m) |> filter(fn: (r) => r._measurement == \"traffic\" and r._field == \"recommendation\") |> last()"}]
+    }
+  ],
+  "refresh": "5s",
+  "schemaVersion": 39,
+  "tags": ["traffic", "edge"],
+  "templating": {"list": []},
+  "time": {"from": "now-1h", "to": "now"},
+  "title": "Traffic Edge Overview",
+  "uid": "traffic-edge-overview",
+  "version": 1
+}

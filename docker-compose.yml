@@ -1,0 +1,99 @@
+services:
+  mosquitto:
+    image: eclipse-mosquitto:2
+    ports:
+      - "1883:1883"
+    volumes:
+      - ./mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mosquitto_sub -h localhost -t healthcheck -C 1 -W 2 >/dev/null 2>&1 & pid=$$!; mosquitto_pub -h localhost -t healthcheck -m ok; wait $$pid"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  simulator:
+    build:
+      context: .
+      dockerfile: simulator/Dockerfile
+    image: traffic-edge-simulator:latest
+    depends_on:
+      mosquitto:
+        condition: service_healthy
+    environment:
+      SCENARIO: ${SCENARIO:-live}
+      INTERVAL: ${INTERVAL:-1}
+
+  web:
+    build:
+      context: .
+      dockerfile: web/Dockerfile
+    image: traffic-edge-web:latest
+    ports:
+      - "8000:8000"
+    depends_on:
+      mosquitto:
+        condition: service_healthy
+      influxdb:
+        condition: service_healthy
+    environment:
+      MQTT_BROKER: mosquitto
+      INFLUX_URL: http://influxdb:8086
+      INFLUX_TOKEN: ${INFLUX_TOKEN:-traffic-demo-token}
+
+  nodered:
+    build:
+      context: ./node-red
+    image: traffic-edge-nodered:latest
+    ports:
+      - "1880:1880"
+    depends_on:
+      mosquitto:
+        condition: service_healthy
+      influxdb:
+        condition: service_healthy
+    environment:
+      DITTO_ENABLED: ${DITTO_ENABLED:-false}
+      DITTO_URL: ${DITTO_URL:-}
+      DITTO_USER: ${DITTO_USER:-ditto}
+      DITTO_PASSWORD: ${DITTO_PASSWORD:-ditto}
+      DITTO_POLICY_ID: ${DITTO_POLICY_ID:-traffic:policy}
+      INFLUX_TOKEN: ${INFLUX_TOKEN:-traffic-demo-token}
+    volumes:
+      - ./node-red/flows-ditto-safe.json:/data/flows.json:ro
+
+  influxdb:
+    image: influxdb:2.7
+    ports:
+      - "8086:8086"
+    environment:
+      DOCKER_INFLUXDB_INIT_MODE: setup
+      DOCKER_INFLUXDB_INIT_USERNAME: admin
+      DOCKER_INFLUXDB_INIT_PASSWORD: traffic-admin-password
+      DOCKER_INFLUXDB_INIT_ORG: traffic
+      DOCKER_INFLUXDB_INIT_BUCKET: traffic
+      DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: traffic-demo-token
+    volumes:
+      - influxdb-data:/var/lib/influxdb2
+    healthcheck:
+      test: ["CMD", "influx", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  grafana:
+    image: grafana/grafana:11.3.0
+    ports:
+      - "3000:3000"
+    depends_on:
+      influxdb:
+        condition: service_healthy
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: traffic-admin-password
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+
+volumes:
+  influxdb-data:
+  grafana-data:

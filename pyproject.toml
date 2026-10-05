@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "traffic-edge-prototype"
+version = "0.1.0"
+description = "Simulated multi-junction traffic edge analytics prototype"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.optional-dependencies]
+mqtt = ["paho-mqtt>=2.1"]
+opcua = ["asyncua>=1.1"]
+dev = ["pytest>=8.0"]
+
+[project.scripts]
+traffic-simulator = "traffic_edge.cli:main"
+traffic-ditto-bootstrap = "traffic_edge.ditto_bootstrap:main"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.setuptools.packages.find]
+where = ["src"]

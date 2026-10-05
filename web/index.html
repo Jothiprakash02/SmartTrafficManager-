@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Traffic Edge Control</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand"><span class="brand-mark">TE</span><div><strong>Traffic Edge</strong><small>Junction operations</small></div></div>
+      <nav class="nav" aria-label="Primary navigation">
+        <button class="nav-item active" data-view="overview"><span>◉</span> Overview</button>
+        <button class="nav-item" data-view="feed"><span>＋</span> Feed traffic</button>
+        <button class="nav-item" data-view="decision"><span>↗</span> Decision view</button>
+      </nav>
+      <div class="sidebar-foot"><span class="pulse"></span><span>Edge gateway online</span></div>
+    </aside>
+    <main class="main-content">
+      <header class="topbar"><div><p class="eyebrow">METRO CORRIDOR / LIVE OPERATIONS</p><h1 id="page-title">Network overview</h1></div><div class="connection"><span class="pulse"></span><span id="last-update">Waiting for telemetry</span></div></header>
+      <section id="overview" class="view active-view">
+        <div class="hero-row"><div><h2>Three junctions, one moving picture.</h2><p>Monitor the edge decisions being made across the corridor in real time.</p></div><button class="primary-button" data-view-target="feed">Feed a scenario <span>→</span></button></div>
+        <div class="metric-strip"><div><span>NETWORK STATUS</span><strong id="network-status">CONNECTING</strong></div><div><span>ACTIVE JUNCTIONS</span><strong>3 / 3</strong></div><div><span>LAST DECISION</span><strong id="last-decision">Awaiting data</strong></div><div><span>REFRESH</span><strong>5 sec</strong></div></div>
+        <div id="junction-grid" class="junction-grid"></div>
+        <div class="lower-grid"><section class="panel"><div class="panel-head"><div><span class="eyebrow">CORRIDOR SIGNAL</span><h3>Junction condition</h3></div><span class="live-chip">LIVE</span></div><div id="bar-chart" class="bar-chart"></div></section><section class="panel"><div class="panel-head"><div><span class="eyebrow">EDGE INTELLIGENCE</span><h3>Current recommendations</h3></div></div><div id="recommendations" class="recommendations"></div></section></div>
+      </section>
+      <section id="feed" class="view"><div class="hero-row"><div><h2>Feed the corridor.</h2><p>Choose a test situation, tune each junction, and preview the edge decision before publishing.</p></div><button class="ghost-button" data-view-target="decision">Open decision view <span>↗</span></button></div><div class="feed-workspace"><div class="feed-controls"><div class="scenario-picker"><label for="scenario">Scenario library</label><select id="scenario"><option value="normal">01 · Normal baseline</option><option value="rush">02 · Rush-hour surge</option><option value="incident">03 · Signal incident</option><option value="weather">04 · Weather slowdown</option><option value="cascade">05 · Cascade propagation</option></select></div><div class="scenario-banner"><div><span class="eyebrow">SELECTED DEMO</span><strong id="scenario-title">Normal baseline</strong><p id="scenario-copy">Balanced traffic across the network.</p></div></div><div id="feed-grid" class="feed-grid"></div><button id="apply-scenario" class="primary-button publish-button">Publish to J1, J2, J3 <span>↗</span></button><div id="feed-result" class="feed-result" role="status"></div></div><aside class="decision-panel"><div class="panel-head"><div><span class="eyebrow">EDGE DECISION / PREVIEW</span><h3>What the gateway will do</h3></div><span id="preview-status" class="live-chip">READY</span></div><div id="decision-route" class="decision-route"></div><div class="decision-summary"><span>NETWORK OUTCOME</span><strong id="preview-outcome">Normal operation</strong><p id="preview-copy">No intervention is expected for this scenario.</p></div><div class="decision-actions"><div><span>Propagation risk</span><strong id="preview-propagation">None detected</strong></div><div><span>Alert level</span><strong id="preview-alert">OK</strong></div></div></aside></div></section>
+      <section id="decision" class="view"><div class="hero-row"><div><h2>Decision room.</h2><p>Follow the chain from incoming traffic to edge recommendation.</p></div><button class="primary-button" data-view-target="feed">Back to feeder <span>←</span></button></div><div class="decision-room"><div class="decision-route large-route" id="room-route"></div><div class="room-grid"><section class="panel"><div class="panel-head"><div><span class="eyebrow">CURRENT OUTCOME</span><h3 id="room-outcome">Waiting for a scenario</h3></div><span class="live-chip">EDGE</span></div><p id="room-copy" class="room-copy">Select a scenario in the feeder to see its expected behavior.</p></section><section class="panel"><div class="panel-head"><div><span class="eyebrow">RESPONSE PLAN</span><h3>Recommended actions</h3></div></div><div id="room-actions" class="recommendations"></div></section></div></div></section>
+    </main>
+  </div>
+  <script src="/app.js"></script>
+</body>
+</html>
